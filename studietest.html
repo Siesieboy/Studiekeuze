@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="studiekeuze_favicon.png">
+<title>Studiekeuze Quiz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+.line-clamp-3{
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+}
+.study-image{
+    width:200px;
+    height:180px;
+    object-fit:cover;
+    border-radius:0.75rem;
+    flex-shrink:0;
+}
+.modal-image{
+    width:100%;
+    height:300px;
+    object-fit:cover;
+    border-radius:0.75rem;
+    margin-bottom:1rem;
+}
+</style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-6">
+
+<div class="max-w-4xl mx-auto">
+
+<!-- HEADER -->
+<div class="bg-white rounded-2xl shadow-xl p-8 mb-6 border border-indigo-100">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <i data-lucide="clipboard-check" class="w-10 h-10 text-indigo-600"></i>
+            <div>
+                <h1 class="text-4xl font-bold text-indigo-800">Studiekeuze Quiz</h1>
+                <p class="text-indigo-600">Ontdek welke studies bij jou passen</p>
+            </div>
+        </div>
+        <a href="index.html" class="px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold">
+            ← Terug
+        </a>
+    </div>
+</div>
+
+<!-- QUIZ FORMULIER -->
+<div id="quizForm" class="bg-white rounded-2xl shadow-xl p-8 mb-6 border border-indigo-100">
+    <h2 class="text-2xl font-bold text-indigo-800 mb-6">Beantwoord deze vragen:</h2>
+    
+    <!-- Vraag 1 -->
+    <div class="mb-6">
+        <label class="block text-lg font-semibold text-indigo-800 mb-3">1. Wat vind je het leukst om te doen?</label>
+        <div class="space-y-2">
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="interest" value="techniek" class="mr-3">
+                <span>Bouwen, programmeren of technische problemen oplossen</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="interest" value="mensen" class="mr-3">
+                <span>Mensen helpen, verzorgen of adviseren</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="interest" value="zakelijk" class="mr-3">
+                <span>Organiseren, ondernemen of leidinggeven</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="interest" value="creatief" class="mr-3">
+                <span>Creatief bezig zijn, ontwerpen of kunst maken</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Vraag 2 -->
+    <div class="mb-6">
+        <label class="block text-lg font-semibold text-indigo-800 mb-3">2. Welk niveau past bij jou?</label>
+        <div class="space-y-2">
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="level" value="WO" class="mr-3">
+                <span>WO - Universiteit (theoretisch, onderzoek)</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="level" value="HBO" class="mr-3">
+                <span>HBO - Hogeschool (praktisch en theoretisch)</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="level" value="MBO" class="mr-3">
+                <span>MBO - Beroepsonderwijs (praktisch, vakgericht)</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Vraag 3 -->
+    <div class="mb-6">
+        <label class="block text-lg font-semibold text-indigo-800 mb-3">3. Waar zie je jezelf werken?</label>
+        <div class="space-y-2">
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="workplace" value="kantoor" class="mr-3">
+                <span>Op kantoor of in een bedrijf</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="workplace" value="zorg" class="mr-3">
+                <span>In de zorg of met mensen</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="workplace" value="buiten" class="mr-3">
+                <span>Buiten of met de handen</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="workplace" value="creatief" class="mr-3">
+                <span>In een creatieve of culturele omgeving</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Vraag 4 -->
+    <div class="mb-6">
+        <label class="block text-lg font-semibold text-indigo-800 mb-3">4. Wat spreekt je het meest aan?</label>
+        <div class="space-y-2">
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="subject" value="exact" class="mr-3">
+                <span>Wiskunde, natuurkunde, scheikunde</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="subject" value="talen" class="mr-3">
+                <span>Talen, communicatie, schrijven</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="subject" value="mens" class="mr-3">
+                <span>Psychologie, gedrag, samenleving</span>
+            </label>
+            <label class="flex items-center p-3 border border-indigo-200 rounded-xl hover:bg-indigo-50 cursor-pointer">
+                <input type="radio" name="subject" value="economie" class="mr-3">
+                <span>Economie, marketing, bedrijfskunde</span>
+            </label>
+        </div>
+    </div>
+
+    <button onclick="showResults()" class="w-full px-6 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-lg">
+        Toon mijn resultaten
+    </button>
+</div>
+
+<!-- RESULTATEN -->
+<div id="resultsSection" class="hidden">
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-6 border border-indigo-100">
+        <h2 class="text-3xl font-bold text-indigo-800 mb-4">✨ Jouw aanbevolen studies</h2>
+        <p class="text-indigo-600 mb-4">Op basis van jouw antwoorden hebben we deze studies voor jou geselecteerd:</p>
+        <button onclick="resetQuiz()" class="px-5 py-3 bg-indigo-100 text-indigo-700 rounded-xl hover:bg-indigo-200 font-semibold">
+            🔄 Opnieuw doen
+        </button>
+    </div>
+    
+    <div id="recommendedStudies" class="grid grid-cols-2 gap-8"></div>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div id="studyModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    onclick="closeModal()">
+
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto"
+         onclick="event.stopPropagation()">
+
+        <div id="modalImageArea"></div>
+        <div id="modalTitleArea"></div>
+        <div id="modalBody" class="mt-4"></div>
+
+        <button onclick="closeModal()"
+            class="mt-6 px-4 py-2 bg-indigo-100 rounded-xl font-semibold text-indigo-700">
+            Sluiten
+        </button>
+    </div>
+</div>
+
+<script>
+/* ======================================================
+   LOAD STUDIES
+   ====================================================== */
+
+let studies = JSON.parse(localStorage.getItem("allStudies")) || [];
+let lastAnswers = {};
+
+/* ======================================================
+   FAVORIETEN FUNCTIES
+   ====================================================== */
+
+function getFavorites(){
+    return JSON.parse(localStorage.getItem("favorites")) || [];
+}
+
+function isFavorite(id){
+    return getFavorites().includes(id);
+}
+
+function toggleFavorite(id){
+    let favs = getFavorites();
+    favs.includes(id) ? favs = favs.filter(f=>f!==id) : favs.push(id);
+    localStorage.setItem("favorites", JSON.stringify(favs));
+    
+    // Refresh de resultaten
+    if(lastAnswers.interest){
+        let recommended = filterStudies(
+            lastAnswers.interest,
+            lastAnswers.level,
+            lastAnswers.workplace,
+            lastAnswers.subject
+        );
+        displayRecommendedStudies(recommended);
+    }
+}
+
+/* ======================================================
+   QUIZ LOGIC
+   ====================================================== */
+
+function showResults() {
+    const interest = document.querySelector('input[name="interest"]:checked');
+    const level = document.querySelector('input[name="level"]:checked');
+    const workplace = document.querySelector('input[name="workplace"]:checked');
+    const subject = document.querySelector('input[name="subject"]:checked');
+    
+    if (!interest || !level || !workplace || !subject) {
+        alert('Vul alsjeblieft alle vragen in!');
+        return;
+    }
+    
+    // Sla antwoorden op
+    lastAnswers = {
+        interest: interest.value,
+        level: level.value,
+        workplace: workplace.value,
+        subject: subject.value
+    };
+    
+    // Filter studies op basis van antwoorden
+    let recommended = filterStudies(
+        interest.value,
+        level.value,
+        workplace.value,
+        subject.value
+    );
+    
+    // Toon resultaten
+    quizForm.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+    displayRecommendedStudies(recommended);
+    
+    // Scroll naar resultaten
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function filterStudies(interest, level, workplace, subject) {
+    let filtered = studies.filter(s => s.level.includes(level));
+    let scored = [];
+    
+    filtered.forEach(study => {
+        let score = 0;
+        const name = study.name.toLowerCase();
+        const desc = study.description.toLowerCase();
+        
+        // Score op basis van interesse
+        if (interest === 'techniek') {
+            if (name.includes('techniek') || name.includes('informatica') || name.includes('elektro') || name.includes('bouw')) score += 3;
+        } else if (interest === 'mensen') {
+            if (name.includes('zorg') || name.includes('verpleeg') || name.includes('sociaal') || name.includes('psychologie')) score += 3;
+        } else if (interest === 'zakelijk') {
+            if (name.includes('bedrijf') || name.includes('economie') || name.includes('management') || name.includes('marketing')) score += 3;
+        } else if (interest === 'creatief') {
+            if (name.includes('design') || name.includes('kunst') || name.includes('mode') || name.includes('grafisch')) score += 3;
+        }
+        
+        // Score op basis van werkplek
+        if (workplace === 'zorg') {
+            if (name.includes('verpleeg') || name.includes('geneeskunde') || name.includes('fysiotherapie') || name.includes('verloskunde')) score += 2;
+        } else if (workplace === 'kantoor') {
+            if (name.includes('bedrijf') || name.includes('finance') || name.includes('communicatie')) score += 2;
+        } else if (workplace === 'creatief') {
+            if (name.includes('design') || name.includes('journalistiek') || name.includes('kunst')) score += 2;
+        }
+        
+        // Score op basis van vakgebied
+        if (subject === 'exact') {
+            if (name.includes('wiskunde') || name.includes('natuurkunde') || name.includes('chemie') || name.includes('techniek')) score += 2;
+        } else if (subject === 'talen') {
+            if (name.includes('taal') || name.includes('communicatie') || name.includes('journalistiek')) score += 2;
+        } else if (subject === 'mens') {
+            if (name.includes('psychologie') || name.includes('sociologie') || name.includes('antropologie')) score += 2;
+        } else if (subject === 'economie') {
+            if (name.includes('economie') || name.includes('bedrijf') || name.includes('marketing')) score += 2;
+        }
+        
+        if (score > 0) {
+            scored.push({ study: study, score: score });
+        }
+    });
+    
+    // Sorteer op score en geef top 10
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 10).map(item => item.study);
+}
+
+function displayRecommendedStudies(recommended) {
+    recommendedStudies.innerHTML = '';
+    
+    if (recommended.length === 0) {
+        recommendedStudies.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-xl p-8 border border-indigo-100 text-center">
+                <p class="text-xl font-semibold text-indigo-800 mb-4">Geen exacte match gevonden.</p>
+                <p class="text-indigo-600 mb-4">Probeer de quiz opnieuw of bekijk alle studies.</p>
+                <a href="index.html" class="inline-block px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold">
+                    Bekijk alle studies
+                </a>
+            </div>`;
+        return;
+    }
+    
+    recommended.forEach(s => {
+        const imageHtml = s.image ? `<img src="${s.image}" alt="${s.name}" class="study-image" onerror="this.style.display='none'">` : '';
+        
+        const cardDiv = document.createElement('div');
+        cardDiv.className = "bg-white rounded-2xl shadow-xl p-6 cursor-pointer border border-indigo-100 hover:shadow-2xl transition flex gap-4 items-start";
+        cardDiv.onclick = function() { openModal(s.id); };
+        
+        cardDiv.innerHTML = `
+            ${imageHtml}
+            <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-xl font-bold text-indigo-800">${s.name}</h3>
+                    <button class="text-2xl star-btn ${isFavorite(s.id)?'text-yellow-400':'text-gray-300'}" data-id="${s.id}">★</button>
+                </div>
+                <p class="text-indigo-700 font-medium">${s.university}</p>
+                <p class="text-sm text-indigo-500">${s.city}</p>
+                <p class="mt-3 text-gray-700 line-clamp-3">${s.description}</p>
+            </div>
+        `;
+        
+        recommendedStudies.appendChild(cardDiv);
+        
+        // Event listener voor de ster knop
+        const starBtn = cardDiv.querySelector('.star-btn');
+        starBtn.onclick = function(e) {
+            e.stopPropagation();
+            toggleFavorite(parseInt(this.getAttribute('data-id')));
+        };
+    });
+    
+    lucide.createIcons();
+}
+
+/* ======================================================
+   MODAL
+   ====================================================== */
+
+function openModal(id){
+    const s = studies.find(st=>st.id===id);
+
+    const imageHtml = s.image ? `<img src="${s.image}" alt="${s.name}" class="modal-image" onerror="this.style.display='none'">` : '';
+
+    modalImageArea.innerHTML = imageHtml;
+
+    modalTitleArea.innerHTML = `
+        <h2 class="text-3xl font-bold text-indigo-800">${s.name}</h2>
+        <p class="text-indigo-600">${s.university}</p>
+    `;
+
+    const modalBtn = document.createElement('button');
+    modalBtn.className = "mb-4 px-4 py-2 rounded-xl bg-yellow-100 text-yellow-700 font-semibold";
+    modalBtn.textContent = isFavorite(s.id) ? "★ Verwijderen uit favorieten" : "☆ Toevoegen aan favorieten";
+    modalBtn.onclick = function() {
+        toggleFavorite(s.id);
+        openModal(s.id);
+    };
+
+    modalBody.innerHTML = `
+        <p><b>Niveau:</b> ${s.level}</p>
+        <p><b>Duur:</b> ${s.duration}</p>
+        <p><b>Locatie:</b> ${s.address}</p>
+        <p><b>Kosten:</b> ${s.costs}</p>
+        <p class="mt-3">${s.description}</p>
+    `;
+    
+    modalBody.insertBefore(modalBtn, modalBody.firstChild);
+
+    studyModal.classList.remove("hidden");
+}
+
+function closeModal(){
+    studyModal.classList.add("hidden");
+}
+
+function resetQuiz() {
+    quizForm.classList.remove('hidden');
+    resultsSection.classList.add('hidden');
+    document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
+    lastAnswers = {};
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ====================================================== */
+
+lucide.createIcons();
+</script>
+
+</body>
+</html>

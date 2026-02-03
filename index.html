@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="studiekeuze_favicon.png">
+<title>Studiekeuze Nederland</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+.line-clamp-3{
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+}
+.study-image{
+    width:200px;
+    height:180px;
+    object-fit:cover;
+    border-radius:0.75rem;
+    flex-shrink:0;
+}
+.modal-image{
+    width:100%;
+    height:300px;
+    object-fit:cover;
+    border-radius:0.75rem;
+    margin-bottom:1rem;
+}
+.study-card{
+    position: relative;
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    overflow: hidden;
+}
+.study-card::before{
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    padding: 3px;
+    background: linear-gradient(135deg, #6366f1, #818cf8, #a5b4fc, #6366f1);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.study-card:hover::before{
+    opacity: 1;
+}
+</style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-6">
+
+<div class="max-w-6xl mx-auto">
+
+<!-- HEADER -->
+<div class="bg-white rounded-2xl shadow-xl p-8 mb-6 flex items-center justify-between border border-indigo-100">
+    <div class="flex items-center gap-4">
+        <i data-lucide="graduation-cap" class="w-10 h-10 text-indigo-600"></i>
+        <div>
+            <h1 class="text-4xl font-bold text-indigo-800">Studiekeuze Nederland</h1>
+            <p class="text-indigo-600">Vind locaties en details over jou toekomstige studie!</p>
+        </div>
+    </div>
+
+    <div class="flex gap-3">
+        <a href="quiz.html" class="px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold">
+            📝 Zoek mijn ideale studie!
+        </a>
+        <a href="favorites.html" class="px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold">
+            ⭐ Favorieten
+        </a>
+    </div>
+</div>
+
+<!-- ZOEKEN -->
+<div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-indigo-100">
+    <div class="flex gap-4 flex-col md:flex-row">
+        <input id="searchInput" type="text" placeholder="Zoek studie, school of stad..."
+            class="flex-1 px-4 py-3 border rounded-xl">
+        <select id="levelFilter" class="px-4 py-3 border rounded-xl">
+            <option value="Alle">Alle niveaus</option>
+            <option value="WO">WO</option>
+            <option value="HBO">HBO</option>
+            <option value="MBO">MBO</option>
+        </select>
+    </div>
+</div>
+
+<div id="resultsCount" class="mb-4 font-semibold text-indigo-800"></div>
+
+<!-- STUDIES -->
+<div id="studyGrid" class="grid grid-cols-2 gap-8"></div>
+
+</div>
+
+<!-- MODAL -->
+<div id="studyModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    onclick="closeModal()">
+
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto"
+         onclick="event.stopPropagation()">
+
+        <div id="modalImageArea"></div>
+        <div id="modalTitleArea"></div>
+        <div id="modalBody" class="mt-4"></div>
+
+        <button onclick="closeModal()"
+            class="mt-6 px-4 py-2 bg-indigo-100 rounded-xl font-semibold text-indigo-700">
+            Sluiten
+        </button>
+    </div>
+</div>
+
+<script>
+/* ======================================================
+   📌 HIER PLAK JIJ AL JE STUDIES
+   ====================================================== */
+
+let studies = [
+    { id: 1, name: "Geneeskunde", university: "Universiteit van Amsterdam", city: "Amsterdam", address: "Meibergdreef 9, 1105 AZ", duration: "6 jaar", level: "WO Bachelor + Master", description: "Opleiding tot arts met focus op medische wetenschap en patiëntenzorg.", costs: "€2.530/jaar", image: "images/geneeskunde.jpg" },
+            { id: 2, name: "Technische Informatica", university: "TU Delft", city: "Delft", address: "Mekelweg 4, 2628 CD", duration: "3 jaar", level: "WO Bachelor", description: "Combinatie van informatica en elektrotechniek voor innovatieve technologie.", costs: "€2.530/jaar", image: "images/technische-informatica.jpg" },
+            { id: 3, name: "Bedrijfskunde", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Leer bedrijfsprocessen optimaliseren en organisaties verbeteren.", costs: "€2.530/jaar", image: "images/bedrijfskunde.jpg" },
+            { id: 4, name: "Psychologie", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Bestudeer menselijk gedrag, cognitie en emoties vanuit wetenschappelijk perspectief.", costs: "€2.530/jaar", image: "images/psychologie.jpg" },
+            { id: 5, name: "Communicatie", university: "Hogeschool van Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Focus op communicatieprocessen binnen organisaties en media.", costs: "€2.530/jaar", image: "images/communicatie.jpg" },
+            { id: 6, name: "Patissier", university:"ROC van Amsterdam" , city:"Amsterdam" , address:"Zaventemweg 79, 1043 CH" , duration:"2 jaar" , level:"MBO Niveau 4" , description:"Leer de fijne kneepjes van het patisserievak en word een meester in zoetigheden." , costs:"€1.200/jaar" , image:"images/patisserie.png"},
+            { id: 7, name: "Civiele Techniek", university: "TU Eindhoven", city: "Eindhoven", address: "Den Dolech 2, 5612 AZ", duration: "3 jaar", level: "WO Bachelor", description: "Ontwerp en bouw infrastructuur zoals bruggen, wegen en waterwerken.", costs: "€2.530/jaar", image: "images/civiele-techniek.jpg" },
+            { id: 8, name: "Verpleegkunde", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding tot verpleegkundige met focus op patiëntenzorg en gezondheid.", costs: "€2.530/jaar", image: "images/verpleegkunde.jpg" },
+            { id: 9, name: "Marketing", university: "Hogeschool Tilburg", city: "Tilburg", address: "Warandelaan 2, 5037 AB", duration: "4 jaar", level: "HBO Bachelor", description: "Leer effectieve marketingstrategieën ontwikkelen en toepassen in diverse markten.", costs: "€2.530/jaar", image: "images/marketing.png" },
+            { id: 10, name: "Elektrotechniek", university: "TU Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Ontwikkel kennis over elektrische systemen en technologieën.", costs: "€2.530/jaar", image: "images/elektrotechniek.png", image: "images/elektrotechniek.png" },
+            { id: 11, name: "Social Work", university: "Hogeschool Arnhem en Nijmegen", city: "Nijmegen", address:"Kapittelweg 33, 6525 EN" , duration:"4 jaar" , level:"HBO Bachelor" , description:"Opleiding gericht op maatschappelijke dienstverlening en sociale vraagstukken." , costs:"€2.530/jaar", image: "images/socialwork.png" },
+            { id: 12, name: "Lucht- en Ruimtevaarttechniek", university: "TU Delft", city: "Delft", address: "Kluyverweg 1, 2629 HS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op ontwerp en ontwikkeling van vliegtuigen en ruimtevaartuigen.", costs: "€2.530/jaar", image: "images/lucht-en-ruimtevaarttechniek.png" },
+            { id: 13, name: "Toerisme en Recreatie", university: "Hogeschool Saxion", city: "Deventer", address: "Willem Wilminkplein 25, 7417 EJ", duration: "4 jaar", level: "HBO Bachelor", description: "Leer over toerisme-industrie en recreatiebeheer.", costs: "€2.530/jaar", image: "images/toerisme-en-recreatie.png" },
+            { id: 14, name: "Bouwkunde", university: "TU Eindhoven", city: "Eindhoven", address: "Den Dolech 2, 5612 AZ", duration: "3 jaar", level: "WO Bachelor", description: "Opleiding gericht op ontwerp en constructie van gebouwen en infrastructuur.", costs: "€2.530/jaar", image: "images/bouwkunde.png" },
+            { id: 15, name: "Logistiek Management", university: "Hogeschool Windesheim", city: "Zwolle", address: "Campusplein 1, 8017 CA", duration: "4 jaar", level: "HBO Bachelor", description: "Leer efficiënte logistieke processen en supply chain management.", costs: "€2.530/jaar", image: "images/logistiek-management.jpg" }, 
+            { id: 16, name: "Verloskunde", university: "Acedemie Verloskunde Amsterdam", city: "Amsterdam", address: "Vlaardingenlaan 1, 1059 GL Amsterdam", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding tot verloskundige met focus op zwangerschap en geboortezorg.", costs: "€2.530/jaar", image: "images/verloskunde.jpg" },
+            { id: 17, name: "Fysiotherapie", university: "Hogeschool van Arnhem en Nijmegen", city: "Nijmegen", address: "Kapittelweg 33, 6525 EN", duration: "4 jaar", level: "HBO Bachelor", description: "Leer patiënten helpen herstellen van lichamelijke klachten en blessures.", costs: "€2.530/jaar", image: "images/fysiotherapie.jpg" },
+            { id: 18, name: "Rechten", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op juridische kennis en vaardigheden in diverse rechtsgebieden.", costs: "€2.530/jaar", image: "images/rechten.jpg" },
+            { id: 19, name: "Horeca en Hospitality Management", university: "NHL Stenden Hogeschool", city: "Leeuwarden", address: "Rengerslaan 8, 8917 DD", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op management in de horeca- en hospitalitysector.", costs: "€2.530/jaar", image: "images/horeca-en-hospitality.jpg" },
+            { id: 20, name: "Milieukunde", university: "Universiteit Wageningen", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op milieuproblematiek en duurzame oplossingen.", costs: "€2.530/jaar", image: "images/milieukunde.jpg" },
+            { id: 21, name: "Pabo", university: "Hogeschool Inholland", city: "Rotterdam", address: "Kralingse Zoom 91, 3063 ND", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding tot leraar basisonderwijs met focus op pedagogiek en didactiek.", costs: "€2.530/jaar", image: "images/pabo.jpg" },
+            { id: 22, name: "Architectuur", university: "TU Delft", city: "Delft", address: "Julianalaan 134, 2628 BL", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op ontwerp en constructie van gebouwen en stedelijke omgevingen.", costs: "€2.530/jaar", image: "images/architectuur.jpg" },
+            { id: 23, name: "Sociale Studies", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op sociale vraagstukken en maatschappelijke dienstverlening.", costs: "€2.530/jaar", image: "images/sociale-studies.jpg" },
+            { id: 24, name: "Biologie", university: "Universiteit van Amsterdam", city: "Amsterdam", address: "Science Park 904, 1098 XH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de wetenschap van het leven en levende organismen.", costs: "€2.530/jaar", image: "images/biologie.jpg" },
+            { id: 25, name: "Event Management", university: "Hogeschool Breda", city: "Breda", address: "Molenstraat 10, 4811 DK", duration: "4 jaar", level: "HBO Bachelor", description: "Leer evenementen organiseren en managen in diverse sectoren.", costs: "€2.530/jaar", image: "images/event-management.jpg" },
+            { id: 26, name: "Culinair Management", university: "ROC van Twente", city: "Enschede", address: "Hengelosestraat 500, 7521 AN", duration: "4 jaar", level: "MBO Niveau 4", description: "Opleiding gericht op management in de culinaire sector.", costs: "€1.200/jaar", image: "images/culinair-management.jpg" },
+            { id: 27, name: "Journalistiek", university: "Hogeschool Windesheim", city: "Zwolle", address: "Campusplein 1, 8017 CA", duration: "4 jaar", level: "HBO Bachelor", description: "Leer nieuws verzamelen, schrijven en publiceren in diverse media.", costs: "€2.530/jaar", image: "images/journalistiek.jpg" },
+            { id: 28, name: "Farmacie", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "6 jaar", level: "WO Bachelor + Master", description: "Opleiding tot apotheker met focus op geneesmiddelen en gezondheidszorg.", costs: "€2.530/jaar", image: "images/farmacie.jpg" },
+            { id: 29, name: "Sportkunde", university: "Hogeschool van Arnhem en Nijmegen", city: "Nijmegen", address: "Kapittelweg 33, 6525 EN", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op sport, beweging en gezondheid.", costs: "€2.530/jaar", image: "images/sportkunde.png" },
+            { id: 30, name: "Informatica", university: "TU Eindhoven", city: "Eindhoven", address: "Den Dolech 2, 5612 AZ", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op softwareontwikkeling, algoritmen en systemen.", costs: "€2.530/jaar", image: "images/informatica.png" },
+            { id: 31, name: "Logopedie", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding tot logopedist met focus op communicatie- en spraakstoornissen.", costs: "€2.530/jaar" },
+            { id: 32, name: "Rechten", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op juridische kennis en vaardigheden in diverse rechtsgebieden.", costs: "€2.530/jaar" },
+            { id: 33, name: "Toegepaste Psychologie", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Leer psychologische principes toepassen in praktische situaties.", costs: "€2.530/jaar" },
+            { id: 34, name: "Milieukunde", university: "Universiteit Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op milieuproblematiek en duurzame oplossingen.", costs: "€2.530/jaar" },
+            { id: 35, name: "Grafisch Ontwerpen", university: "Hogeschool voor de Kunsten Utrecht", city: "Utrecht", address: "Padualaan 101, 3584 CH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op visuele communicatie en ontwerpprincipes.", costs: "€2.530/jaar" },
+            { id: 36, name: "Verloskunde", university: "Acedemie Verloskunde Groningen", city: "Groningen", address: "Dirk Huizingastraat 3-5, 9713 GL Groningen", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding tot verloskundige met focus op zwangerschap en geboortezorg.", costs: "€2.530/jaar" },
+            { id: 37, name: "Technische Bedrijfskunde", university: "TU Delft", city: "Delft", address: "Mekelweg 4, 2628 CD", duration: "3 jaar", level: "WO Bachelor", description: "Combinatie van techniek en bedrijfskunde voor innovatieve oplossingen.", costs: "€2.530/jaar" },
+            { id: 38, name: "Sociaal Pedagogische Hulpverlening", university: "Hogeschool Inholland", city: "Haarlem", address: "Zijlweg 1, 2015 CE", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op hulpverlening en begeleiding in sociale contexten.", costs: "€2.530/jaar" },
+            { id: 39, name: "Chemie", university: "Universiteit Leiden", city: "Leiden", address: "Einsteinweg 55, 2333 CC", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de wetenschap van stoffen en hun reacties.", costs: "€2.530/jaar" },
+            { id: 40, name: "Hotelmanagement", university: "NHL Stenden Hogeschool", city: "Leeuwarden", address: "Rengerslaan 8, 8917 DD", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op management in de hotel- en hospitalitysector.", costs: "€2.530/jaar" },
+            { id: 41, name: "Diergeneeskunde", university: "Universiteit Utrecht", city: "Utrecht", address: "Yalelaan 1, 3584 CM", duration: "6 jaar", level: "WO Bachelor + Master", description: "Opleiding tot dierenarts met focus op diergezondheid en welzijn.", costs: "€2.530/jaar" },
+            { id: 42, name: "Technische Natuurkunde", university: "TU Eindhoven", city: "Eindhoven", address: "Den Dolech 2, 5612 AZ", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de toepassing van natuurkundige principes in technologie.", costs: "€2.530/jaar" },
+            { id: 43, name: "Sociaal Werk", university: "Hogeschool van Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op maatschappelijke dienstverlening en sociale vraagstukken.", costs: "€2.530/jaar" },
+            { id: 44, name: "Geografie en Planologie", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op ruimtelijke ordening en milieubeheer.", costs: "€2.530/jaar" },
+            { id: 45, name: "Mode en Design", university: "Hogeschool Amsterdam Fashion Institute", city: "Amsterdam", address: "Hobbemastraat 22, 1071 ZC", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op modeontwerp en textielinnovatie.", costs: "€2.530/jaar" },
+            { id: 46, name: "Voeding en Diëtetiek", university: "Hogeschool van Arnhem en Nijmegen", city: "Nijmegen", address: "Kapittelweg 33, 6525 EN", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op voeding, gezondheid en dieetadvies.", costs: "€2.530/jaar" },
+            { id: 47, name: "Technische Geneeskunde", university: "TU Delft", city: "Delft", address: "Mekelweg 4, 2628 CD", duration: "3 jaar", level: "WO Bachelor", description: "Combinatie van techniek en geneeskunde voor innovatieve zorgoplossingen.", costs: "€2.530/jaar" },
+            { id: 48, name: "Culturele Antropologie", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op culturele diversiteit en menselijke samenlevingen.", costs: "€2.530/jaar" },
+            { id: 49, name: "Podotherapie", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding tot podotherapeut met focus op voet- en houdingsproblemen.", costs: "€2.530/jaar" },
+            { id: 50, name: "Technische Bedrijfskunde", university: "TU Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Combinatie van techniek en bedrijfskunde voor innovatieve oplossingen.", costs: "€2.530/jaar" },
+            { id: 51, name: "Muziektherapie", university: "Hogeschool voor de Kunsten Utrecht", city: "Utrecht", address: "Padualaan 101, 3584 CH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het gebruik van muziek als therapeutisch middel.", costs: "€2.530/jaar" },
+            { id: 52, name: "Biologie", university: "Universiteit Utrecht", city: "Utrecht", address: "Yalelaan 1, 3584 CM", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op biologische processen en systemen.", costs: "€2.530/jaar" },
+            { id: 53, name: "Technische Informatica", university: "TU Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Combinatie van informatica en elektrotechniek voor innovatieve technologie.", costs: "€2.530/jaar" },
+            { id: 54, name: "Sociaal Pedagogische Hulpverlening", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op hulpverlening en begeleiding in sociale contexten.", costs: "€2.530/jaar" },
+            { id: 55, name: "Natuur- en Sterrenkunde", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de fysica van het universum en hemellichamen.", costs: "€2.530/jaar" },
+            { id: 56, name: "Theater en Drama", university: "Hogeschool voor de Kunsten Utrecht", city: "Utrecht", address: "Padualaan 101, 3584 CH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op acteren, regisseren en theaterproductie.", costs: "€2.530/jaar" },
+            { id: 57, name: "Voeding en Diëtetiek", university: "Hogeschool Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op voeding, gezondheid en dieetadvies.", costs: "€2.530/jaar" },
+            { id: 58, name: "Technische Natuurkunde", university: "TU Delft", city: "Delft", address: "Mekelweg 4, 2628 CD", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de toepassing van natuurkundige principes in technologie.", costs: "€2.530/jaar" },
+            { id: 59, name: "Culturele Antropologie", university: "Universiteit Amsterdam", city: "Amsterdam", address: "Science Park 904, 1098 XH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op culturele diversiteit en menselijke samenlevingen.", costs: "€2.530/jaar" },
+            { id: 60, name: "Podotherapie", university: "Hogeschool van Arnhem en Nijmegen", city: "Nijmegen", address: "Kapittelweg 33, 6525 EN", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding tot podotherapeut met focus op voet- en houdingsproblemen.", costs: "€2.530/jaar" },
+            { id: 61, name: "grafisch Ontwerpen", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op visuele communicatie en ontwerpprincipes.", costs: "€2.530/jaar" },
+            { id: 62, name: "Journalistiek", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Leer nieuws verzamelen, schrijven en publiceren in diverse media.", costs: "€2.530/jaar" },
+            { id: 63, name: "Culinair Management", university: "ROC van Amsterdam", city: "Amsterdam", address: "Zaventemweg 79, 1043 CH", duration: "4 jaar", level: "MBO Niveau 4", description: "Opleiding gericht op management in de culinaire sector.", costs: "€1.200/jaar" },
+            { id: 64, name: "Event Management", university: "Hogeschool van Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Leer evenementen organiseren en managen in diverse sectoren.", costs: "€2.530/jaar" },
+            { id: 65, name: "Communicatiewetenschappen", university: "Universiteit van Amsterdam", city: "Amsterdam", address: "Nieuwe Achtergracht 166, 1018 WS Amsterdam", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op communicatieprocessen binnen organisaties en media.", costs: "€2.530/jaar" },
+            { id: 66, name: "Engelstalige Taal en Cultuur", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Engelse taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 67, name: "Spaanse Taal en Cultuur", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Spaanse taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 68, name: "Franse Taal en Cultuur", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Franse taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 69, name: "Duitse Taal en Cultuur", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Duitse taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 70, name: "Italiaanse Taal en Cultuur", university: "Universiteit Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Italiaanse taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 71, name: "Japanse Taal en Cultuur", university: "Universiteit van Amsterdam", city: "Amsterdam", address: "Nieuwe Achtergracht 166, 1018 WS Amsterdam", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Japanse taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 72, name: "Chinese Taal en Cultuur", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Chinese taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 73, name: "Arabische Taal en Cultuur", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Arabische taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 74, name: "Russische Taal en Cultuur", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Russische taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 75, name: "Portugese Taal en Cultuur", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de Portugese taal, literatuur en cultuur.", costs: "€2.530/jaar" },
+            { id: 76, name: "Kunstgeschiedenis", university: "Universiteit van Amsterdam", city: "Amsterdam", address: "Nieuwe Achtergracht 166, 1018 WS Amsterdam", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de geschiedenis van kunst en visuele cultuur.", costs: "€2.530/jaar" },
+            { id: 77, name: "Archeologie", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op het onderzoeken van menselijke geschiedenis via materiële resten.", costs: "€2.530/jaar" },
+            { id: 78, name: "Filosofie", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op fundamentele vragen over bestaan, kennis en ethiek.", costs: "€2.530/jaar" },
+            { id: 79, name: "Geschiedenis", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op het begrijpen van historische gebeurtenissen en processen.", costs: "€2.530/jaar" },
+            { id: 80, name: "Sociologie", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op sociale structuren en interacties binnen samenlevingen.", costs: "€2.530/jaar" },
+            { id: 81, name: "Politicologie", university: "Universiteit Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op politieke systemen, gedrag en theorieën.", costs: "€2.530/jaar" },
+            { id: 82, name: "bedrijfskunde", university: "Universiteit van Amsterdam", city: "Amsterdam", address: "Nieuwe Achtergracht 166, 1018 WS Amsterdam", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op management, organisatie en bedrijfsvoering.", costs: "€2.530/jaar"},
+            { id: 83, name: "Econometrie", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op het toepassen van wiskundige en statistische methoden in economie.", costs: "€2.530/jaar" },
+            { id: 84, name: "Psychologie", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op menselijk gedrag en mentale processen.", costs: "€2.530/jaar" },
+            { id: 85, name: "Bedrijfseconomie", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op financiële en economische aspecten van bedrijven.", costs: "€2.530/jaar" },
+            { id: 86, name: "Marketing & Communicatie", university: "Hogeschool van Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Leer effectieve marketingstrategieën ontwikkelen en toepassen in diverse markten.", costs: "€2.530/jaar" },
+            { id: 87, name: "International Business", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op internationale handel en bedrijfsvoering.", costs: "€2.530/jaar" },
+            { id: 88, name: "Finance & Control", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Leer financiële processen binnen organisaties beheersen en optimaliseren.", costs: "€2.530/jaar" },
+            { id: 89, name: "Human Resource Management", university: "Hogeschool Windesheim", city: "Zwolle", address: "Campusplein 1, 8017 CA", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op personeelsmanagement en organisatieontwikkeling.", costs: "€2.530/jaar" },
+            { id: 90, name: "International Tourism Management", university: "NHL Stenden Hogeschool", city: "Leeuwarden", address: "Rengerslaan 8, 8917 DD", duration: "4 jaar", level: "HBO Bachelor", description: "Leer toerisme en hospitality in een internationale context beheren.", costs: "€2.530/jaar" },
+            { id: 91, name: "Small Business & Retail Management", university: "Hogeschool van Arnhem en Nijmegen", city: "Nijmegen", address: "Kapittelweg 33, 6525 EN", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het managen van kleine bedrijven en retailzaken.", costs: "€2.530/jaar" },
+            { id: 92, name: "Commerciële Economie", university: "Hogeschool Inholland", city: "Rotterdam", address: "Kralingse Zoom 91, 3063 ND", duration: "4 jaar", level: "HBO Bachelor", description: "Leer commerciële strategieën ontwikkelen en toepassen in diverse markten.", costs: "€2.530/jaar" },
+            { id: 93, name: "Technische Bedrijfskunde", university: "TU Eindhoven", city: "Eindhoven", address: "Den Dolech 2, 5612 AZ", duration: "3 jaar", level: "WO Bachelor", description: "Combinatie van techniek en bedrijfskunde voor innovatieve oplossingen.", costs: "€2.530/jaar" },
+            { id: 94, name: "International Business Administration", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op internationale bedrijfsvoering en management.", costs: "€2.530/jaar" },
+            { id: 95, name: "Bedrijfskunde MER", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op management, economie en recht binnen bedrijven.", costs: "€2.530/jaar" },
+            { id: 96, name: "Logistiek en Economie", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Leer logistieke processen en economische principes toepassen in bedrijfsvoering.", costs: "€2.530/jaar" },
+            { id: 97, name: "Wiskunde", university: "Universiteit Leiden", city: "Leiden", address: "Einsteinweg 55, 2333 CC", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op wiskundige theorieën en toepassingen in diverse vakgebieden.", costs: "€2.530/jaar" },
+            { id: 98, name: "Technische Wiskunde", university: "TU Delft", city: "Delft", address: "Mekelweg 4, 2628 CD", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de toepassing van wiskunde in technische en wetenschappelijke contexten.", costs: "€2.530/jaar" },
+            { id: 99, name: "Informatica", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op softwareontwikkeling, algoritmen en systemen.", costs: "€2.530/jaar" },
+            { id: 100, name: "Data Science", university: "Universiteit Amsterdam", city: "Amsterdam", address: "Science Park 904, 1098 XH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op het analyseren en interpreteren van grote datasets.", costs: "€2.530/jaar" },
+            { id: 101, name: "Artificial Intelligence", university: "TU Eindhoven", city: "Eindhoven", address: "Den Dolech 2, 5612 AZ", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de ontwikkeling van intelligente systemen en toepassingen.", costs: "€2.530/jaar" },
+            { id: 102, name: "Cyber Security", university: "TU Delft", city: "Delft", address: "Mekelweg 4, 2628 CD", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op het beschermen van digitale systemen en netwerken tegen bedreigingen.", costs: "€2.530/jaar" },
+            { id: 103, name: "Bio-informatica", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de toepassing van informatica in de biowetenschappen.", costs: "€2.530/jaar" },
+            { id: 104, name: "Dierenwetenschappen", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de biologie, verzorging en het welzijn van dieren.", costs: "€2.530/jaar"},
+            { id: 105, name: "Landschapsarchitectuur", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op het ontwerpen en beheren van buitenruimtes en landschappen.", costs: "€2.530/jaar" },
+            { id: 106, name: "Voedingsmiddelentechnologie", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de productie, verwerking en veiligheid van voedingsmiddelen.", costs: "€2.530/jaar" },
+            { id: 107, name: "Agrotechnologie", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op technologische innovaties in de landbouwsector.", costs: "€2.530/jaar" },
+            { id: 108, name: "Internationale Land- en Waterbeheer", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op duurzaam beheer van land- en waterbronnen wereldwijd.", costs: "€2.530/jaar" },
+            { id: 109, name: "Bos- en Natuurbeheer", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op het behoud en beheer van bossen en natuurlijke ecosystemen.", costs: "€2.530/jaar" },
+            { id: 110, name: "Milieuwetenschappen", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op milieuproblematiek en duurzame oplossingen.", costs: "€2.530/jaar" },
+            { id: 111, name: "Internationale Ontwikkelingsstudies", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op mondiale ontwikkelingsvraagstukken en duurzame oplossingen.", costs: "€2.530/jaar" },
+            { id: 112, name: "Plantenwetenschappen", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de biologie en verbetering van planten.", costs: "€2.530/jaar" },
+            { id: 113, name: "Duurzame Landbouw", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op duurzame landbouwpraktijken en voedselproductie.", costs: "€2.530/jaar" },
+            { id: 114, name: "Agro- en Foodbusiness", university: "Wageningen University & Research", city: "Wageningen", address: "Droevendaalsesteeg 4, 6708 PB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op de zakelijke kant van de agrarische en voedselindustrie.", costs: "€2.530/jaar" },
+            { id: 115, name: "seksuele Gezondheid", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op seksuele gezondheid en voorlichting.", costs: "€2.530/jaar" },
+            { id: 116, name: "Seksuologie", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op menselijk seksueel gedrag en relaties.", costs: "€2.530/jaar" },
+            { id: 117, name: "Toegepaste Psychologie", university: "Hogeschool van Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het toepassen van psychologische principes in diverse contexten.", costs: "€2.530/jaar" },
+            { id: 118, name: "Arbeids- en Organisatiepsychologie", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op menselijk gedrag binnen organisaties en werkplekken.", costs: "€2.530/jaar" },
+            { id: 119, name: "Rechten", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op juridische principes en het rechtssysteem.", costs: "€2.530/jaar" },
+            { id: 120, name: "Fiscaal Recht", university: "Universiteit Amsterdam", city: "Amsterdam", address: "Nieuwe Achtergracht 166, 1018 WS Amsterdam", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op belastingrecht en fiscale regelgeving.", costs: "€2.530/jaar" },
+            { id: 121, name: "Internationaal Recht", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op internationale juridische systemen en verdragen.", costs: "€2.530/jaar" },
+            { id: 122, name: "Strafrecht", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op strafrechtelijke principes en procedures.", costs: "€2.530/jaar" },
+            { id: 123, name: "Bestuursrecht", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op bestuursrechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 124, name: "Arbeidsrecht", university: "Universiteit Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op arbeidsrechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 125, name: "Milieurecht", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op milieurechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 126, name: "Intellectueel Eigendomsrecht", university: "Universiteit Amsterdam", city: "Amsterdam", address: "Nieuwe Achtergracht 166, 1018 WS Amsterdam", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op intellectueel eigendomsrechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 127, name: "Europees Recht", university: "Universiteit Utrecht", city: "Utrecht", address: "Heidelberglaan 1, 3584 CS", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op Europese juridische systemen en regelgeving.", costs: "€2.530/jaar" },
+            { id: 128, name: "Gezondheidsrecht", university: "Universiteit Groningen", city: "Groningen", address: "Nijenborgh 4, 9747 AG", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op gezondheidsrechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 129, name: "Ondernemingsrecht", university: "Universiteit Maastricht", city: "Maastricht", address: "Bouillonstraat 1-3, 6211 LH", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op ondernemingsrechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 130, name: "Internationaal Strafrecht", university: "Universiteit Twente", city: "Enschede", address: "Drienerlolaan 5, 7522 NB", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op internationale strafrechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 131, name: "Forensisch Recht", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op forensische rechtelijke principes en regelgeving.", costs: "€2.530/jaar" },
+            { id: 132, name: "Conflict- en Crisismanagement", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het managen van conflicten en crises in diverse contexten.", costs: "€2.530/jaar" },
+            { id: 133, name: "Veiligheidskunde", university: "Hogeschool van Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op veiligheidsmanagement en risicobeheer.", costs: "€2.530/jaar" },
+            { id: 134, name: "Brandweeropleiding", university: "NIFV - Nederlands Instituut Fysieke Veiligheid", city: "Arnhem", address: "Klarenbeekseweg 30, 6816 VC", duration: "3 jaar", level: "MBO Niveau 4", description: "Opleiding tot brandweerman/-vrouw met focus op brandbestrijding en reddingsoperaties.", costs: "€1.500/jaar" },
+            { id: 135, name: "Politieopleiding", university: "Politieacademie", city: "Apeldoorn", address: "Deventerstraat 44, 7311 HE", duration: "3 jaar", level: "MBO Niveau 4", description: "Opleiding tot politieagent met focus op handhaving van de openbare orde en veiligheid.", costs: "€1.500/jaar" },
+            { id: 136, name: "Sociaal Pedagogische Hulpverlening", university: "Hogeschool van Amsterdam", city: "Amsterdam", address: "Wibautstraat 3b, 1091 GH", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het bieden van hulp en ondersteuning aan kwetsbare groepen in de samenleving.", costs: "€2.530/jaar" },
+            { id: 137, name: "Maatschappelijk Werk en Dienstverlening", university: "Hogeschool Utrecht", city: "Utrecht", address: "Heidelberglaan 7, 3584 CS", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het ondersteunen van individuen en groepen bij sociale problemen.", costs: "€2.530/jaar" },
+            { id: 138, name: "Jeugdzorg", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het bieden van zorg en ondersteuning aan jongeren in moeilijke situaties.", costs: "€2.530/jaar" },
+            { id: 139, name: "Gezins- en Opvoedingsondersteuning", university: "Hogeschool Windesheim", city: "Zwolle", address: "Campusplein 1, 8017 CA", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op het ondersteunen van gezinnen bij opvoedingsvraagstukken.", costs: "€2.530/jaar" },
+            { id: 140, name: "Culturele Antropologie en Ontwikkelingssociologie", university: "Universiteit Leiden", city: "Leiden", address: "Wassenaarseweg 52, 2333 AK", duration: "3 jaar", level: "WO Bachelor", description: "Studie gericht op culturele diversiteit en sociale ontwikkeling wereldwijd.", costs: "€2.530/jaar" },
+            { id: 141, name: "KLM Flight Academy Pilot", university: "KLM Flight Academy", city: "Lelystad", address: "Vliegveldweg 1, 8218 NA", duration: "2 jaar", level: "MBO Niveau 4", description: "Opleiding tot commercieel piloot met focus op veiligheid en operationele vaardigheden.", costs: "€15.000/jaar" },
+            { id: 142, name: "Maritieme Techniek", university: "Hogeschool Rotterdam", city: "Rotterdam", address: "Museumpark 40, 3015 CX", duration: "4 jaar", level: "HBO Bachelor", description: "Opleiding gericht op de technische aspecten van scheepsbouw en maritieme systemen.", costs: "€2.530/jaar" },
+            { id: 143, name: "Officier van Justitie Opleiding", university: "Academie voor de Rechtspraak", city: "Zutphen", address: "Rijksweg 12, 7201 BB", duration: "2 jaar", level: "WO Master", description: "Opleiding tot officier van justitie met focus op strafrechtelijke procedures en rechtshandhaving.", costs: "€3.000/jaar" },
+            { id: 144, name: "Notarieel Recht Opleiding", university: "Notarieel Instituut Nederland", city: "Amsterdam", address: "Herengracht 476, 1017 CA", duration: "2 jaar", level: "WO Master", description: "Opleiding tot notaris met focus op notarieel recht en juridische dienstverlening.", costs: "€3.000/jaar" },
+            { id: 145, name: "Forensisch Onderzoek Opleiding", university: "NIFV - Nederlands Instituut Fysieke Veiligheid", city: "Arnhem", address: "Klarenbeekseweg 30, 6816 VC", duration: "2 jaar", level: "MBO Niveau 4", description: "Opleiding gericht op forensisch onderzoek en bewijsverzameling bij misdrijven.", costs: "€1.500/jaar" }
+];
+
+// Studies opslaan in localStorage zodat favorieten.html ze ook kan gebruiken
+localStorage.setItem("allStudies", JSON.stringify(studies));
+
+/* ======================================================
+   FAVORIETEN
+   ====================================================== */
+
+function getFavorites(){
+    return JSON.parse(localStorage.getItem("favorites")) || [];
+}
+
+function isFavorite(id){
+    return getFavorites().includes(id);
+}
+
+function toggleFavorite(id){
+    let favs = getFavorites();
+    favs.includes(id) ? favs = favs.filter(f=>f!==id) : favs.push(id);
+    localStorage.setItem("favorites", JSON.stringify(favs));
+    renderStudies();
+}
+
+/* ======================================================
+   RENDER STUDIES
+   ====================================================== */
+
+function renderStudies(){
+    const search = searchInput.value.toLowerCase();
+    const level = levelFilter.value;
+
+    const filtered = studies.filter(s =>
+        (s.name.toLowerCase().includes(search) ||
+         s.university.toLowerCase().includes(search) ||
+         s.city.toLowerCase().includes(search)) &&
+        (level==="Alle" || s.level.includes(level))
+    );
+
+    resultsCount.innerText = `${filtered.length} studies gevonden`;
+    studyGrid.innerHTML = "";
+    
+    filtered.forEach(s=>{
+        const imageHtml = s.image ? `<img src="${s.image}" alt="${s.name}" class="study-image" onerror="this.style.display='none'">` : '';
+        
+        const cardDiv = document.createElement('div');
+        cardDiv.className = "study-card cursor-pointer shadow-xl hover:shadow-2xl transition flex gap-4 items-start";
+        cardDiv.onclick = function() { openModal(s.id); };
+        
+        cardDiv.innerHTML = `
+            ${imageHtml}
+            <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-xl font-bold text-indigo-800">${s.name}</h3>
+                    <button class="text-2xl star-btn ${isFavorite(s.id)?'text-yellow-400':'text-gray-300'}" data-id="${s.id}">★</button>
+                </div>
+                <p class="text-indigo-700 font-medium">${s.university}</p>
+                <p class="text-sm text-indigo-500">${s.city}</p>
+                <p class="mt-3 text-gray-700 line-clamp-3">${s.description}</p>
+            </div>
+        `;
+        
+        studyGrid.appendChild(cardDiv);
+        
+        // Event listener voor de ster knop
+        const starBtn = cardDiv.querySelector('.star-btn');
+        starBtn.onclick = function(e) {
+            e.stopPropagation();
+            toggleFavorite(parseInt(this.getAttribute('data-id')));
+        };
+    });
+
+    lucide.createIcons();
+}
+
+/* ======================================================
+   MODAL
+   ====================================================== */
+
+function openModal(id){
+    const s = studies.find(st=>st.id===id);
+
+    const imageHtml = s.image ? `<img src="${s.image}" alt="${s.name}" class="modal-image" onerror="this.style.display='none'">` : '';
+
+    modalImageArea.innerHTML = imageHtml;
+
+    modalTitleArea.innerHTML = `
+        <h2 class="text-3xl font-bold text-indigo-800">${s.name}</h2>
+        <p class="text-indigo-600">${s.university}</p>
+    `;
+
+    const modalBtn = document.createElement('button');
+    modalBtn.className = "mb-4 px-4 py-2 rounded-xl bg-yellow-100 text-yellow-700 font-semibold";
+    modalBtn.textContent = isFavorite(s.id) ? "★ Verwijderen uit favorieten" : "☆ Toevoegen aan favorieten";
+    modalBtn.onclick = function() {
+        toggleFavorite(s.id);
+        openModal(s.id); // Refresh modal to update button
+    };
+
+    modalBody.innerHTML = `
+        <p><b>Niveau:</b> ${s.level}</p>
+        <p><b>Duur:</b> ${s.duration}</p>
+        <p><b>Locatie:</b> ${s.address}</p>
+        <p><b>Kosten:</b> ${s.costs}</p>
+        <p class="mt-3">${s.description}</p>
+    `;
+    
+    modalBody.insertBefore(modalBtn, modalBody.firstChild);
+
+    studyModal.classList.remove("hidden");
+}
+
+function closeModal(){
+    studyModal.classList.add("hidden");
+}
+
+/* ====================================================== */
+
+searchInput.addEventListener("input", renderStudies);
+levelFilter.addEventListener("change", renderStudies);
+
+renderStudies();
+lucide.createIcons();
+</script>
+
+</body>
+</html>
